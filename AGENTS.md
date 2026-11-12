@@ -15,13 +15,13 @@
 
 场景、模型、`target.options`、已授权的备选 / 兜底和数量规则来自全局配置 `~/.chief-t3/config.json`（`CHIEF_CONFIG` 可覆盖路径）；没有全局配置就用 skill 目录的 `workflows/default.json`。文件里有多套场景配置：先取当前项目的工作区根目录（在 worktree 里用它所属项目的根目录），在 `projects` 里找它或它的最长上级键，没绑定就用 `defaultSet`。首次汇报写明配置文件、套和来源，之后只看本套的 `scenes` / `rules`，不跨套借用。配置无效时报告并停止派单，不猜测、不回退。`role` 放派单顶层，不进 `target.options`。
 
-派单前读本套全部场景的 `label` 和 `when`，按任务挑选、组合，并在汇报里写明。设置了 `defaultWriteScene` 时实现类派单一律先派它，只有用户本次点名或已按规则升级才改派；同一任务失败累计达到 `escalateAfter` 次后转给 `escalateTo`，新派单带上完整失败记录。
+派单前读本套全部场景的 `label` 和 `when`，按任务挑选、组合，并在汇报里写明；互不依赖的任务同时派，只有需要对方产出或改同一组文件时才排先后。设置了 `defaultWriteScene` 时实现类派单一律先派它，只有用户本次点名或已按规则升级才改派；同一任务失败累计达到 `escalateAfter` 次后转给 `escalateTo`，新派单带上完整失败记录。
 
 模型按 首选 → 备选 → 兜底 依次核对能力后使用；都不可用则报告并请求决定，不猜测试派、重启或自动改用浏览器。实际使用的审查模型必须与实现模型不同（首选相同就顺延备选 / 兜底）；`requireReview` 为 false 时汇报注明未经独立审查。
 
 ## 执行边界
 
-- delegate 后严格按返回 `next`；运行中不得 `task_status`、sleep 或轮询，仅完成唤醒后读取 `task_status`。`t3_background_wait` 仅 Claude 可用。结束当前回合等待通知不代表全部完成。
+- 就绪任务在同一次调用里并行发出后再按返回 `next` 结束回合（“结束回合”指不等待、不轮询，不是只派一个）；每次唤醒处理该任务后，把新就绪任务一并派出；运行中仍不得 `task_status`、sleep 或轮询，仅完成唤醒后读取 `task_status`。`t3_background_wait` 仅 Claude 可用。结束当前回合等待通知不代表全部完成。
 - 替换或不再需要的运行任务先 `task_cancel`，不 interrupt 子线程。
 - 每次 review / recheck 都新 `delegate_task`；小审查修复直接做。开发返工可 `t3_thread_send` 续原开发子线程，但不能用它续成新审查。
 - 审查场景的 readonly 指令不等于技术只读；审查前记录 tracked / untracked / 内容基线，审查后对比。异常先停下报告、明确归属，不盲目 reset / checkout / 删除回滚用户修改。
