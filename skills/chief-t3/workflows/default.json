@@ -14,33 +14,39 @@
           "access": "readonly",
           "reportLimit": 300,
           "primary": {
-            "provider": "pi",
-            "model": "opencode-go/deepseek-v4.1-flash",
+            "provider": "codex",
+            "model": "gpt-6.1-sol",
             "options": {
-              "thinking": "high"
+              "reasoningEffort": "medium"
             }
           },
-          "backup": null,
+          "backup": {
+            "provider": "codex",
+            "model": "gpt-6-astra",
+            "options": {
+              "reasoningEffort": "medium"
+            }
+          },
           "fallback": null
         },
         "navigator": {
           "label": "大范围分析",
-          "when": "大范围索引或多模态分析；全库索引产出关键调用链与影响面摘要，细节写文件；规格或影响面不清时先摸底",
+          "when": "大范围索引或多模态分析；全库索引产出关键调用链与影响面摘要，细节写文件；规格或影响面不清时先摸底。需要视觉分析时先启用 Antigravity，再把本场景首选改成本机列出的 Gemini 模型；没有视觉输入时只暂停相关部分",
           "delegateRole": "research",
           "access": "readonly",
           "reportLimit": 500,
           "primary": {
-            "provider": "antigravity",
-            "model": "gemini-3.8-flash",
+            "provider": "codex",
+            "model": "gpt-6-astra",
             "options": {
-              "thinking_level": "high"
+              "reasoningEffort": "medium"
             }
           },
           "backup": {
             "provider": "codex",
             "model": "gpt-6.1-sol",
             "options": {
-              "reasoningEffort": "high"
+              "reasoningEffort": "medium"
             }
           },
           "fallback": null
@@ -51,13 +57,19 @@
           "delegateRole": "implementation",
           "access": "write",
           "primary": {
-            "provider": "opencode",
-            "model": "opencode-go/deepseek-v4.1-flash",
+            "provider": "codex",
+            "model": "gpt-6.1-sol",
             "options": {
-              "variant": "high"
+              "reasoningEffort": "medium"
             }
           },
-          "backup": null,
+          "backup": {
+            "provider": "codex",
+            "model": "gpt-6-astra",
+            "options": {
+              "reasoningEffort": "medium"
+            }
+          },
           "fallback": null
         },
         "dev": {
@@ -66,13 +78,19 @@
           "delegateRole": "implementation",
           "access": "write",
           "primary": {
-            "provider": "opencode",
-            "model": "opencode-go/deepseek-v4.1-flash",
+            "provider": "codex",
+            "model": "gpt-6.1-sol",
             "options": {
-              "variant": "high"
+              "reasoningEffort": "medium"
             }
           },
-          "backup": null,
+          "backup": {
+            "provider": "codex",
+            "model": "gpt-6-astra",
+            "options": {
+              "reasoningEffort": "medium"
+            }
+          },
           "fallback": null
         },
         "reviewer": {
@@ -81,13 +99,19 @@
           "delegateRole": "review",
           "access": "readonly",
           "primary": {
-            "provider": "claudeAgent",
-            "model": "claude-opus-5-5",
+            "provider": "codex",
+            "model": "gpt-6-astra",
             "options": {
-              "effort": "medium"
+              "reasoningEffort": "xhigh"
             }
           },
-          "backup": null,
+          "backup": {
+            "provider": "codex",
+            "model": "gpt-6.1-sol",
+            "options": {
+              "reasoningEffort": "medium"
+            }
+          },
           "fallback": null
         },
         "architect": {
@@ -96,17 +120,17 @@
           "delegateRole": "design",
           "access": "write",
           "primary": {
-            "provider": "claudeAgent",
-            "model": "claude-opus-5-5",
+            "provider": "codex",
+            "model": "gpt-6-astra",
             "options": {
-              "effort": "high"
+              "reasoningEffort": "xhigh"
             }
           },
           "backup": {
             "provider": "codex",
-            "model": "gpt-6-astra",
+            "model": "gpt-6.1-sol",
             "options": {
-              "reasoningEffort": "high"
+              "reasoningEffort": "medium"
             }
           },
           "fallback": null
@@ -117,17 +141,17 @@
           "delegateRole": "general",
           "access": "write",
           "primary": {
-            "provider": "antigravity",
-            "model": "gemini-3.8-flash",
+            "provider": "codex",
+            "model": "gpt-6.1-sol",
             "options": {
-              "thinking_level": "low"
+              "reasoningEffort": "medium"
             }
           },
           "backup": {
-            "provider": "pi",
-            "model": "opencode-go/glm-5.3-flash",
+            "provider": "codex",
+            "model": "gpt-6-astra",
             "options": {
-              "thinking": "low"
+              "reasoningEffort": "medium"
             }
           },
           "fallback": null
