@@ -23,7 +23,9 @@
 
 - 就绪任务在同一次调用里并行发出后再按返回 `next` 结束回合（“结束回合”指不等待、不轮询，不是只派一个）；每次唤醒处理该任务后，把新就绪任务一并派出；运行中仍不得 `task_status`、sleep 或轮询，仅完成唤醒后读取 `task_status`。`t3_background_wait` 仅 Claude 可用。结束当前回合等待通知不代表全部完成。
 - 替换或不再需要的运行任务先 `task_cancel`，不 interrupt 子线程。
-- 每次 review / recheck 都新 `delegate_task`；小审查修复直接做。开发返工可 `t3_thread_send` 续原开发子线程，但不能用它续成新审查。
+- 团队制：按任务规模组队，成员编号（W 实现 / 摸底、R 审查）、模型、会话 id 记入 HANDOFF 花名册。成员第一次派单 `delegate_task` 并记 `childThreadId`，之后一律 `t3_thread_send` 续派（mode 默认，不能换模型），只派给空闲成员；续派返回新 `taskId`，唤醒与并行规则同 `delegate_task`。
+- 新开会话只在：需要更多并行人手、出现新范围 / 场景、失败升级换模型（招 `escalateTo` 场景新成员）、完全不相关的新任务；成员上下文过长或换范围用 `freshContext:true` 加交接摘要续派。任务完成后归档团队会话并清空花名册。
+- 审查员 R1 编入团队，模型与被审实现者不同、不审自己参与实现的改动；复查与同项目后续审查都续用 R1。小审查修复直接做；开发返工默认续派原实现成员。
 - 审查场景的 readonly 指令不等于技术只读；审查前记录 tracked / untracked / 内容基线，审查后对比。异常先停下报告、明确归属，不盲目 reset / checkout / 删除回滚用户修改。
 - worktree 由平台 `isolation:"worktree"` 建立；派单前不编造绝对路径、不要求 shell 创建，要求 Worker 使用平台分配目录并报告真实路径。父未提交改动不会复制。非 Git 项目不得擅自初始化；shared 明确已授权的实际目录。
 - `t3_thread_launch` / `create_threads` 仅用户明确要求新线程时使用。浏览器仅当次用户请求浏览器工作时使用，不自动降级打开。
