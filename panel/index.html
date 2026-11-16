@@ -1337,8 +1337,10 @@ const TASK_TYPES = { implementation: "实现", research: "调研", review: "审�
 const EFFORT_KEYS = { reasoningEffort: "推理强度", thinking: "思考强度" };
 const EFFORT_LEVELS = { low: "低", medium: "中", high: "高", xhigh: "极高" };
 // Chinese names for T3 option descriptors / values; unknown ones fall back to T3's own label.
-const OPT_NAMES = { reasoningEffort: "推理强度", effort: "推理强度", thinking: "思考强度", thinking_level: "思考强度", serviceTier: "服务档位", fastMode: "快速模式" };
+const OPT_NAMES = { reasoningEffort: "推理强度", effort: "推理强度", thinking: "思考强度", thinking_level: "思考强度", serviceTier: "快速模式", fastMode: "快速模式" };
 const CHOICE_NAMES = { off: "关闭", minimal: "最低", low: "低", medium: "中", high: "高", xhigh: "极高", max: "最高", auto: "自动", default: "默认", priority: "优先" };
+// Value names that only apply to one descriptor; everything else falls back to CHOICE_NAMES.
+const OPT_CHOICE_NAMES = { serviceTier: { priority: "快速", default: "标准" } };
 const SLOT_NAMES = { primary: "首选模型", backup: "备选模型", fallback: "兜底模型" };
 const NUM_RULES = [
   { key: "maxParallelWriters", before: "最多", after: "个 Worker 同时写代码", min: 1, max: 8 },
@@ -1496,7 +1498,8 @@ const provOf = (id) => state.t3?.providers?.find((p) => p.id === id);
 const modelOf = (t) => provOf(t?.provider)?.models.find((m) => m.slug === t?.model);
 const usable = (p) => p.enabled && p.installed && p.status === "ready";
 const optName = (d) => OPT_NAMES[d.id] || d.label;
-const choiceName = (c) => CHOICE_NAMES[c.id] ? `${CHOICE_NAMES[c.id]}（${c.id}）` : c.label === c.id ? c.id : `${c.label}（${c.id}）`;
+const choiceLabel = (optId, c) => OPT_CHOICE_NAMES[optId]?.[c.id] || CHOICE_NAMES[c.id] || c.label;
+const choiceName = (optId, c) => OPT_CHOICE_NAMES[optId]?.[c.id] || (CHOICE_NAMES[c.id] ? `${CHOICE_NAMES[c.id]}（${c.id}）` : c.label === c.id ? c.id : `${c.label}（${c.id}）`);
 async function loadProviders() {
   try { state.t3 = await api("GET", "/api/providers"); } catch (e) { state.t3 = { ok: false, error: e.message, providers: [] }; }
 }
@@ -1948,9 +1951,9 @@ function t3ModelCard(p, t, title, actions) {
     const def = d.choices.find((c) => c.isDefault);
     const items = d.type === "boolean"
       ? [["true", "开", cur === true], ["false", "关", cur === false]]
-      : d.choices.map((c) => [c.id, choiceName(c), c.id === cur]);
+      : d.choices.map((c) => [c.id, choiceName(d.id, c), c.id === cur]);
     return `<label class="field"><span>${esc(optName(d))}</span><select data-act="t3-opt" data-p="${P(p)}" data-key="${esc(d.id)}" data-type="${esc(d.type)}">
-      <option value="" ${cur === undefined ? "selected" : ""}>不设置${def ? `（T3 默认：${esc(CHOICE_NAMES[def.id] || def.label)}）` : ""}</option>
+      <option value="" ${cur === undefined ? "selected" : ""}>不设置${def ? `（T3 默认：${esc(choiceLabel(d.id, def))}）` : ""}</option>
       ${items.map(([v, l, sel]) => `<option value="${esc(v)}" ${sel ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>`;
   }).join("") : effortControl(p, t);
   return `<div class="model-card" data-card="${P(p)}">
